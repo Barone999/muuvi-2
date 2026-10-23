@@ -47,9 +47,11 @@ function Perfil() {
     if (pregnant && !due) { toast.error("Informe as semanas ou a data prevista do parto."); return; }
     const id = await uid();
     // Cycle data is never touched here, so it is still there when she turns the mode off.
-    await supabase.from("profiles").update({ display_name: name, days_per_week: days, pregnant, due_date: pregnant ? due : null }).eq("id", id);
+    const { error } = await supabase.from("profiles").update({ display_name: name, days_per_week: days, pregnant, due_date: pregnant ? due : null }).eq("id", id);
+    if (error) { toast.error("Não foi possível salvar seus ajustes."); return; }
     if (cycle && !cycle.isDemo) {
-      await supabase.from("cycle_settings").update({ cycle_length: cycleLen, period_length: periodLen }).eq("user_id", id);
+      const { error: cErr } = await supabase.from("cycle_settings").update({ cycle_length: cycleLen, period_length: periodLen }).eq("user_id", id);
+      if (cErr) { toast.error("Não foi possível salvar os dados do ciclo."); return; }
     }
     invalidate("profile", "cycle");
     toast.success("Ajustes salvos");
