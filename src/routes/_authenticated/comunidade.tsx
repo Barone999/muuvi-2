@@ -73,15 +73,19 @@ function Comunidade() {
 
   async function like(postId: string, liked: boolean) {
     const user_id = await uid();
-    if (liked) await supabase.from("post_likes").delete().eq("post_id", postId).eq("user_id", user_id);
-    else await supabase.from("post_likes").insert({ post_id: postId, user_id });
+    const { error } = liked
+      ? await supabase.from("post_likes").delete().eq("post_id", postId).eq("user_id", user_id)
+      : await supabase.from("post_likes").insert({ post_id: postId, user_id });
+    if (error) toast.error("Não foi possível registrar a curtida.");
     invalidate("posts");
   }
 
   async function report(postId: string) {
     const user_id = await uid();
     const { error } = await supabase.from("post_reports").insert({ post_id: postId, user_id, reason: "inadequado" });
-    toast(error ? "Você já denunciou esta publicação." : "Obrigada por avisar. Vamos analisar com cuidado.");
+    if (!error) toast("Obrigada por avisar. Vamos analisar com cuidado.");
+    else if (error.code === "23505") toast("Você já denunciou esta publicação.");
+    else toast.error("Não foi possível enviar a denúncia.");
   }
 
   return (
