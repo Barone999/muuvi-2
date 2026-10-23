@@ -16,7 +16,8 @@ function usePosts() {
   return useQuery({
     queryKey: ["posts"],
     queryFn: async () => {
-      const { data: posts } = await supabase.from("posts").select("*").order("created_at", { ascending: false }).limit(50);
+      const { data: posts, error } = await supabase.from("posts").select("*").order("created_at", { ascending: false }).limit(50);
+      if (error) throw error;
       const ids = (posts ?? []).map((p) => p.id);
       const [{ data: likes }, { data: comments }] = await Promise.all([
         supabase.from("post_likes").select("*").in("post_id", ids),
@@ -130,7 +131,8 @@ function PostCard({ post, me, myName, onLike, onReport, onComment }: {
   async function send() {
     if (!c.trim()) return;
     const user_id = await uid();
-    await supabase.from("post_comments").insert({ post_id: post.id, user_id, author_name: myName, content: c.trim() });
+    const { error } = await supabase.from("post_comments").insert({ post_id: post.id, user_id, author_name: myName, content: c.trim() });
+    if (error) { toast.error("Não foi possível comentar."); return; }
     setC(""); onComment();
   }
 

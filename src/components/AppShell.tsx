@@ -68,7 +68,7 @@ export function AppShell({ title, children }: { title?: string; children: ReactN
             className="flex w-full items-center justify-center gap-2 rounded-3xl py-2.5 text-sm font-semibold text-primary transition-colors active:bg-ink-foreground/10"
           >
             {menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-            Menuu
+            Menu
           </button>
         </div>
       </nav>
