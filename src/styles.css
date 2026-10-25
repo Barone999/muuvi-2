@@ -63,6 +63,7 @@
   --color-linen: var(--linen);
   --color-surface: var(--surface);
   --color-ink: var(--ink);
+  --color-ink-foreground: var(--ink-foreground);
   --color-blush: var(--blush);
   --color-terracotta: var(--terracotta);
   --color-sage: var(--sage);
@@ -80,6 +81,7 @@
   --linen: oklch(0.949 0.017 76.1);
   --surface: oklch(0.987 0.010 72.7);
   --ink: oklch(0.353 0.015 133.6);
+  --ink-foreground: oklch(0.949 0.017 76.1);
   --blush: oklch(0.877 0.054 15.4);
   --terracotta: oklch(0.772 0.089 31.4);
   --sage: oklch(0.918 0.024 135.7);
@@ -126,6 +128,7 @@
   --linen: oklch(0.268 0.008 137.8);
   --surface: oklch(0.319 0.010 139.4);
   --ink: oklch(0.949 0.017 76.1);
+  --ink-foreground: oklch(0.268 0.008 137.8);
   --blush: oklch(0.398 0.038 16.4);
   --terracotta: oklch(0.772 0.089 31.4);
   --sage: oklch(0.379 0.028 141.1);
