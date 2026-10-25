@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { Heart, MessageCircle, Flag, ImagePlus, Send, X } from "lucide-react";
+import { Heart, MessageCircle, Flag, ImagePlus, Send, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { supabase } from "@/integrations/supabase/client";
@@ -89,6 +89,16 @@ function Comunidade() {
     else toast.error("Não foi possível enviar a denúncia.");
   }
 
+  async function remove(postId: string) {
+    if (!window.confirm("Excluir esta publicação? Essa ação não pode ser desfeita.")) return;
+    const user_id = await uid();
+    // RLS "delete own post" only allows the author; eq(user_id) keeps the intent explicit.
+    const { data, error } = await supabase.from("posts").delete().eq("id", postId).eq("user_id", user_id).select("id");
+    if (error || !data?.length) { toast.error("Não foi possível excluir a publicação."); return; }
+    toast.success("Publicação excluída.");
+    invalidate("posts");
+  }
+
   return (
     <AppShell title="Comunidade">
       <p className="mb-4 text-foreground/70">Um espaço de apoio. Celebre cada passo — o seu e o das outras. 💛</p>
@@ -111,7 +121,7 @@ function Comunidade() {
 
       <div className="mt-4 space-y-4">
         {posts.map((p) => (
-          <PostCard key={p.id} post={p} me={user?.id} myName={name} onLike={like} onReport={report} onComment={() => invalidate("posts")} />
+          <PostCard key={p.id} post={p} me={user?.id} myName={name} onLike={like} onReport={report} onDelete={remove} onComment={() => invalidate("posts")} />
         ))}
       </div>
     </AppShell>
@@ -120,9 +130,9 @@ function Comunidade() {
 
 type Post = ReturnType<typeof usePosts>["data"] extends (infer T)[] | undefined ? T : never;
 
-function PostCard({ post, me, myName, onLike, onReport, onComment }: {
+function PostCard({ post, me, myName, onLike, onReport, onDelete, onComment }: {
   post: Post; me?: string | undefined; myName: string;
-  onLike: (id: string, liked: boolean) => void; onReport: (id: string) => void; onComment: () => void;
+  onLike: (id: string, liked: boolean) => void; onReport: (id: string) => void; onDelete: (id: string) => void; onComment: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [c, setC] = useState("");
@@ -144,6 +154,9 @@ function PostCard({ post, me, myName, onLike, onReport, onComment }: {
           <p className="truncate font-bold text-ink">{post.author_name}</p>
           <p className="text-xs text-foreground/50">há {timeAgo(post.created_at)}</p>
         </div>
+        {me && post.user_id === me && (
+          <button aria-label="Excluir publicação" onClick={() => onDelete(post.id)} className="text-foreground/40 hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
+        )}
         {post.user_id !== me && (
           <button aria-label="Denunciar" onClick={() => onReport(post.id)} className="text-foreground/40"><Flag className="h-4 w-4" /></button>
         )}
